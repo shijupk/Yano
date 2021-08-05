@@ -34,11 +34,12 @@ namespace Yano
             {"while", TokenType.WHILE}
         };
 
+        private readonly string _source;
+        private readonly List<Token> _tokens = new List<Token>();
+
         private int _current;
         private int _line = 1;
-        private readonly string _source;
         private int _start;
-        private readonly List<Token> _tokens = new List<Token>();
 
         public Scanner(string source)
         {
@@ -61,7 +62,7 @@ namespace Yano
                 ScanToken();
             }
 
-            _tokens.Add(new Token(TokenType.EOF, "", null, _line));
+            _tokens.Add(new Token(TokenType.EOF, "", null, _line, _start));
             return _tokens;
         }
 
@@ -269,7 +270,7 @@ namespace Yano
         private void AddToken(TokenType type, object literal = null)
         {
             var text = GetToken(_start, _current);
-            _tokens.Add(new Token(type, text, literal, _line));
+            _tokens.Add(new Token(type, text, literal, _line, _start));
         }
 
         private char Advance()

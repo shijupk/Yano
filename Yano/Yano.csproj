@@ -42,6 +42,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AstPrinter.cs" />
+    <Compile Include="Expression\Assign.cs" />
+    <Compile Include="Expression\Binary.cs" />
+    <Compile Include="Expression\Call.cs" />
+    <Compile Include="Expression\This.cs" />
+    <Compile Include="Expression\Get.cs" />
+    <Compile Include="Expression\Grouping.cs" />
+    <Compile Include="Expression\Literal.cs" />
+    <Compile Include="Expression\Logical.cs" />
+    <Compile Include="Expression\Set.cs" />
+    <Compile Include="Expression\Super.cs" />
+    <Compile Include="Expression\Unary.cs" />
+    <Compile Include="Expression\Variable.cs" />
+    <Compile Include="Interface\Expression.cs" />
+    <Compile Include="Interface\IExpression.cs" />
+    <Compile Include="Interface\IVisitor.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="TokenType.cs" />
     <Compile Include="Yano.cs" />
@@ -53,5 +69,6 @@
   <ItemGroup>
     <Compile Include="Token.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

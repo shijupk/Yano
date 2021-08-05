@@ -11,19 +11,20 @@ namespace Yano
         public TokenType Type { get; set; }
         public string Lexeme { get; set; }
         public object Literal { get; set; }
-
         public int Line { get; set; }
+        public int Position { get; set; }
 
         public Token()
         {
         }
 
-        public Token(TokenType type, string lexeme, object literal, int line)
+        public Token(TokenType type, string lexeme, object literal, int line, int position)
         {
             Type = type;
             Lexeme = lexeme;
             Literal = literal;
             Line = line;
+            Position = position;
         }
 
         public string ToPrint()
