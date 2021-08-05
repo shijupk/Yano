@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Yano.Exception;
 using Yano.Expression;
 
 #endregion
@@ -31,7 +32,9 @@ namespace Yano
         public static char BoxRightJoin = '┤';
         public static char BoxBottomJoin = '┴';
         public static bool HadError { get; private set; }
+        public static bool HadRuntimeError { get; private set; } = false;
 
+        private static  Interpreter _interpreter = new Interpreter();
 
         private static void Main(string[] args)
         {
@@ -97,6 +100,19 @@ namespace Yano
             var scanner = new Scanner(line);
             var tokens = scanner.ScanTokens();
             PrintLex(tokens);
+            if (!HadError)
+            {
+                var parser = new Parser(tokens);
+                var expression = parser.Parse();
+                if (!HadError)
+                {
+                    //var res = new AstPrinter().Print(expression);
+                    var res = _interpreter.Interpret(expression);
+                    Output(res);
+                }
+
+            }
+
         }
 
         private static void PrintLex(List<Token> tokens)
@@ -121,6 +137,24 @@ namespace Yano
             Report(line, "", message);
         }
 
+        public static void Error(Token token, string message)
+        {
+            if (token.Type == TokenType.EOF)
+            {
+                Report(token.Line, "at end", message);
+            }
+            else
+            {
+                Report(token.Line, $"at '{token.Lexeme}' ", message);
+            }
+
+        }
+
+        public static void RuntimeError(RuntimeException exp)
+        {
+            Report(exp.Token.Line, "", exp.Message);
+            HadRuntimeError = true;
+        }
         private static void Report(int line, string where, string message)
         {
             var content = $"line {line} Error {where}: {message}";
@@ -131,6 +165,18 @@ namespace Yano
             Console.WriteLine(
                 $" {BoxBottomLeft}{new string(BoxBottom, content.Length + bannerMsg.Length)}{BoxBottomRight}");
             HadError = true;
+            Console.ResetColor();
+        }
+
+        private static void Output(string message)
+        {
+            var bannerMsg = "Result";
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($" {BoxTopLeft}{bannerMsg}{new string(BoxTop, message.Length)}{BoxTopRight}");
+            Console.WriteLine($" {BoxLeft}{message}{new string(' ', bannerMsg.Length)}{BoxRight}");
+            Console.WriteLine(
+                $" {BoxBottomLeft}{new string(BoxBottom, message.Length + bannerMsg.Length)}{BoxBottomRight}");
+            HadError = false;
             Console.ResetColor();
         }
     }

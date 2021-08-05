@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AstPrinter.cs" />
+    <Compile Include="Exception\ParseException.cs" />
     <Compile Include="Expression\Assign.cs" />
     <Compile Include="Expression\Binary.cs" />
     <Compile Include="Expression\Call.cs" />
@@ -55,9 +56,10 @@
     <Compile Include="Expression\Super.cs" />
     <Compile Include="Expression\Unary.cs" />
     <Compile Include="Expression\Variable.cs" />
-    <Compile Include="Interface\Expression.cs" />
     <Compile Include="Interface\IExpression.cs" />
     <Compile Include="Interface\IVisitor.cs" />
+    <Compile Include="Interpreter.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="TokenType.cs" />
     <Compile Include="Yano.cs" />
