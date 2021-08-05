@@ -8,6 +8,6 @@ namespace Yano.Interface
 {
     public interface IExpression
     {
-         T Accept<T>(IExpressionVisitor<T> expressionVisitor);
+        T Accept<T>(IExpressionVisitor<T> expressionVisitor);
     }
 }

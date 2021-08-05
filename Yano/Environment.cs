@@ -1,16 +1,32 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Environment.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Yano.Exception;
-using Yano.Expression;
+
+#endregion
 
 namespace Yano
 {
     public class Environment
     {
-        private IDictionary<string, object> _values = new Dictionary<string, object>();
+        private readonly IDictionary<string, object> _values = new Dictionary<string, object>();
+
+        public Environment Enclosing { get; set; }
+
+        public Environment()
+        {
+        }
+
+        public Environment(Environment enclosing)
+        {
+            Enclosing = enclosing;
+        }
 
         public void Define(string name, object value)
         {
@@ -23,6 +39,12 @@ namespace Yano
             {
                 return _values[name.Lexeme];
             }
+
+            if (Enclosing != null)
+            {
+                return Enclosing.Get(name);
+            }
+
             throw new RuntimeException(name, $"Undefined variable '{name.Lexeme}'.");
         }
 
@@ -34,8 +56,13 @@ namespace Yano
                 return;
             }
 
+            if (Enclosing != null)
+            {
+                Enclosing.Assign(name, value);
+                return;
+            }
+
             throw new RuntimeException(name, $"Undefined variable '{name.Lexeme}'.");
         }
-
     }
 }

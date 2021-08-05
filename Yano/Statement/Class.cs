@@ -1,10 +1,16 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Class.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Yano.Expression;
 using Yano.Interface;
+
+#endregion
 
 namespace Yano.Statement
 {
@@ -12,7 +18,7 @@ namespace Yano.Statement
     {
         public Token Name { get; set; }
         public Variable SuperClass { get; set; }
-        private IList<Function> Methods { get; set; }
+        private IList<Function> Methods { get; }
 
         public Class(Token name, Variable superClass, IList<Function> methods)
         {
@@ -20,9 +26,10 @@ namespace Yano.Statement
             SuperClass = superClass;
             Methods = methods;
         }
+
         public override T Accept<T>(IStatementVisitor<T> statementVisitor)
         {
-           return statementVisitor.VisitClassStmt(this);
+            return statementVisitor.VisitClassStmt(this);
         }
     }
 }

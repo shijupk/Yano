@@ -1,9 +1,15 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Block.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Yano.Interface;
+
+#endregion
 
 namespace Yano.Statement
 {
@@ -15,6 +21,7 @@ namespace Yano.Statement
         {
             Statements = statements;
         }
+
         public override T Accept<T>(IStatementVisitor<T> visitor)
         {
             return visitor.VisitBlockStmt(this);

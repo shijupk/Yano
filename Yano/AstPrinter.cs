@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: AstPrinter.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
+using System;
 using System.Text;
-using System.Threading.Tasks;
 using Yano.Expression;
 using Yano.Interface;
 
+#endregion
+
 namespace Yano
 {
-    public class AstPrinter :IExpressionVisitor<string>
+    public class AstPrinter : IExpressionVisitor<string>
     {
-        public string Print(IExpression expression)
-        {
-            return expression.Accept(this);
-        }
-
         public string VisitAssignExpr(Assign expr)
         {
             throw new NotImplementedException();
@@ -48,6 +49,7 @@ namespace Yano
             {
                 return "nil";
             }
+
             return expr.Value.ToString();
         }
 
@@ -81,9 +83,14 @@ namespace Yano
             throw new NotImplementedException();
         }
 
+        public string Print(IExpression expression)
+        {
+            return expression.Accept(this);
+        }
+
         private string Parenthesize(string name, params IExpression[] expressions)
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append("(").Append(name);
             foreach (var expr in expressions)
             {
@@ -94,6 +101,5 @@ namespace Yano
             builder.Append(")");
             return builder.ToString();
         }
-
     }
 }

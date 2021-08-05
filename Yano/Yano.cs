@@ -31,10 +31,10 @@ namespace Yano
         public static char BoxLeftJoin = '├';
         public static char BoxRightJoin = '┤';
         public static char BoxBottomJoin = '┴';
-        public static bool HadError { get; private set; }
-        public static bool HadRuntimeError { get; private set; } = false;
 
-        private static  Interpreter _interpreter = new Interpreter();
+        private static readonly Interpreter _interpreter = new Interpreter();
+        public static bool HadError { get; private set; }
+        public static bool HadRuntimeError { get; private set; }
 
         private static void Main(string[] args)
         {
@@ -69,8 +69,8 @@ namespace Yano
 
             var res = new AstPrinter().Print(expr);
             Console.WriteLine(res);
-
         }
+
         private static void Prompt()
         {
             Console.OutputEncoding = Encoding.GetEncoding(866);
@@ -110,9 +110,7 @@ namespace Yano
                     _interpreter.Interpret(statements);
                     //Output(res);
                 }
-
             }
-
         }
 
         private static void PrintLex(List<Token> tokens)
@@ -147,7 +145,6 @@ namespace Yano
             {
                 Report(token.Line, $"at '{token.Lexeme}' ", message);
             }
-
         }
 
         public static void RuntimeError(RuntimeException exp)
@@ -155,6 +152,7 @@ namespace Yano
             Report(exp.Token.Line, "", exp.Message);
             HadRuntimeError = true;
         }
+
         private static void Report(int line, string where, string message)
         {
             var content = $"line {line} Error {where}: {message}";

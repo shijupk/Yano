@@ -4,7 +4,11 @@
 // FILENAME: IExpressionVisitor.cs
 // ----------------------------------------------------------------------------------------
 
+#region
+
 using Yano.Expression;
+
+#endregion
 
 namespace Yano.Interface
 {

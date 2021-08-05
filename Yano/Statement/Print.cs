@@ -1,13 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Print.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using Yano.Interface;
+
+#endregion
 
 namespace Yano.Statement
 {
-    public class Print: AbstractStatement
+    public class Print : AbstractStatement
     {
         public IExpression Expression { get; set; }
 
@@ -15,6 +20,7 @@ namespace Yano.Statement
         {
             Expression = expression;
         }
+
         public override T Accept<T>(IStatementVisitor<T> statementVisitor)
         {
             return statementVisitor.VisitPrintStmt(this);

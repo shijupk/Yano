@@ -1,13 +1,20 @@
 ﻿// ---------------------------------------------------------------------------------------
 // Copyright Shiju P K 2021
 // 
-// FILENAME: AbstractStatement.cs
+// FILENAME: YannoCallable.cs
 // ----------------------------------------------------------------------------------------
 
-namespace Yano.Interface
+#region
+
+using System.Collections.Generic;
+
+#endregion
+
+namespace Yano
 {
-    public abstract class AbstractStatement
+    public interface YannoCallable
     {
-        public abstract T Accept<T>(IStatementVisitor<T> statementVisitor);
+        int Arity();
+        object call(Interpreter interpreter, IList<object> arguments);
     }
 }

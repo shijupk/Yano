@@ -1,13 +1,19 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Function.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Yano.Interface;
+
+#endregion
 
 namespace Yano.Statement
 {
-    public class Function: AbstractStatement
+    public class Function : AbstractStatement
     {
         public Token Name { get; set; }
         public IList<Token> Parameters { get; set; }
@@ -19,6 +25,7 @@ namespace Yano.Statement
             Parameters = parameters;
             Body = body;
         }
+
         public override T Accept<T>(IStatementVisitor<T> statementVisitor)
         {
             return statementVisitor.VisitFunctionStmt(this);

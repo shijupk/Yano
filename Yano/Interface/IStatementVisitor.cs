@@ -1,9 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: IStatementVisitor.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using Yano.Statement;
+
+#endregion
 
 namespace Yano.Interface
 {

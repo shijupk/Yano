@@ -45,6 +45,7 @@
     <Compile Include="AstPrinter.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="Exception\ParseException.cs" />
+    <Compile Include="Exception\ReturnAsException.cs" />
     <Compile Include="Expression\Assign.cs" />
     <Compile Include="Expression\Binary.cs" />
     <Compile Include="Expression\Call.cs" />
@@ -74,8 +75,10 @@
     <Compile Include="Statement\Var.cs" />
     <Compile Include="Statement\While.cs" />
     <Compile Include="TokenType.cs" />
+    <Compile Include="YannoCallable.cs" />
     <Compile Include="Yano.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="YanoFunction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

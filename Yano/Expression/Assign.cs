@@ -12,7 +12,7 @@ using Yano.Interface;
 
 namespace Yano.Expression
 {
-    public class Assign: IExpression
+    public class Assign : IExpression
     {
         public Token Name { get; set; }
         public IExpression Value { get; set; }

@@ -1,16 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: ParseException.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
+using System;
+
+#endregion
 
 namespace Yano.Exception
 {
-    public class ParseException: System.Exception
+    public class ParseException : System.Exception
     {
         public ParseException(string message) : base(message)
         {
-
         }
     }
 
