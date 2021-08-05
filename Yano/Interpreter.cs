@@ -7,28 +7,35 @@ using System.Threading.Tasks;
 using Yano.Exception;
 using Yano.Expression;
 using Yano.Interface;
+using Yano.Statement;
 
 namespace Yano
 {
-    public class Interpreter : IVisitor<Object>
+    public class Interpreter : IExpressionVisitor<Object>, IStatementVisitor<Object>
     {
-        public object VisitAssignExpr(Assign expr)
-        {
-            throw new NotImplementedException();
-        }
+        private Environment _environment = new Environment();
 
-        public string Interpret(IExpression expr)
+
+
+        public void Interpret(IList<AbstractStatement> statements)
         {
             try
             {
-                object value = Evaluate(expr);
-                return Stringify(value);
+                foreach (var statement in statements)
+                {
+                    Execute(statement);
+                }
             }
             catch (RuntimeException e)
             {
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        private void Execute(AbstractStatement statement)
+        {
+            statement.Accept(this);
         }
 
         private string Stringify(object obj)
@@ -51,6 +58,14 @@ namespace Yano
 
             return obj.ToString();
         }
+
+        public object VisitAssignExpr(Assign expr)
+        {
+            object value = Evaluate(expr.Value);
+            _environment.Assign(expr.Name, value);
+            return value;
+        }
+
         public object VisitBinaryExpr(Binary expr)
         {
             Object left = Evaluate(expr.Left);
@@ -209,6 +224,60 @@ namespace Yano
         }
 
         public object VisitVariableExpr(Variable expr)
+        {
+            return _environment.Get(expr.Name);
+        }
+
+        public object VisitBlockStmt(Block stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitClassStmt(Class stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitExpressionStmt(ExpressionStatement stmt)
+        {
+            Evaluate(stmt.Expression);
+            return null;
+        }
+
+        public object VisitFunctionStmt(Function stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitIfStmt(IfStatement stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitPrintStmt(Print stmt)
+        {
+            object value = Evaluate(stmt.Expression);
+            Console.WriteLine(Stringify(value));
+            return null;
+        }
+
+        public object VisitReturnStmt(Return stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object VisitVarStmt(Var stmt)
+        {
+            object value = null;
+            if (stmt.Initializer != null)
+            {
+                value = Evaluate(stmt.Initializer);
+            }
+            _environment.Define(stmt.Name.Lexeme, value);
+            return null;
+        }
+
+        public object VisitWhileStmt(While stmt)
         {
             throw new NotImplementedException();
         }

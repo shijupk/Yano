@@ -15,17 +15,17 @@ namespace Yano.Expression
     public class Assign: IExpression
     {
         public Token Name { get; set; }
-        public IExpression Vale { get; set; }
+        public IExpression Value { get; set; }
 
-        private Assign(Token name, IExpression value)
+        public Assign(Token name, IExpression value)
         {
             Name = name;
-            Vale = value;
+            Value = value;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitAssignExpr(this);
+            return expressionVisitor.VisitAssignExpr(this);
         }
     }
 }

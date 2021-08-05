@@ -9,7 +9,7 @@ using Yano.Interface;
 
 namespace Yano
 {
-    public class AstPrinter :IVisitor<string>
+    public class AstPrinter :IExpressionVisitor<string>
     {
         public string Print(IExpression expression)
         {

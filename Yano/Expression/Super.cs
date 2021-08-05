@@ -23,9 +23,9 @@ namespace Yano.Expression
             Method = method;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitSuperExpr(this);
+            return expressionVisitor.VisitSuperExpr(this);
         }
     }
 }

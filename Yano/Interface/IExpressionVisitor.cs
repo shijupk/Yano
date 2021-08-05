@@ -1,14 +1,14 @@
 ﻿// ---------------------------------------------------------------------------------------
 // Copyright Shiju P K 2021
 // 
-// FILENAME: IVisitor.cs
+// FILENAME: IExpressionVisitor.cs
 // ----------------------------------------------------------------------------------------
 
 using Yano.Expression;
 
 namespace Yano.Interface
 {
-    public interface IVisitor<T>
+    public interface IExpressionVisitor<T>
     {
         T VisitAssignExpr(Assign expr);
         T VisitBinaryExpr(Binary expr);

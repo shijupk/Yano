@@ -1,45 +1,125 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: Parser.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Yano.Exception;
 using Yano.Expression;
 using Yano.Interface;
+using Yano.Statement;
+
+#endregion
 
 namespace Yano
 {
     public class Parser
     {
-        private IList<Token> _tokens;
-        private int _current = 0;
+        private int _current;
+        private readonly IList<Token> _tokens;
 
         public Parser(IList<Token> tokens)
         {
             _tokens = tokens;
         }
 
-        public IExpression Parse()
+        public IList<AbstractStatement> Parse()
+        {
+            IList<AbstractStatement> statements = new List<AbstractStatement>();
+            while (!IsAtEnd())
+            {
+                statements.Add(Declaration());
+            }
+
+            return statements;
+        }
+
+        private AbstractStatement Declaration()
         {
             try
             {
-                return Expression();
+                if (Match(TokenType.VAR))
+                {
+                    return VarDeclaration();
+                }
+
+                return Statement();
             }
-            catch (ParseException)
+            catch (ParseException ex)
             {
+                Synchronize();
                 return null;
             }
         }
+
+        private AbstractStatement VarDeclaration()
+        {
+            var name = Consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+            IExpression initializer = null;
+            if (Match(TokenType.EQUAL))
+            {
+                initializer = Expression();
+            }
+
+            Consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+            return new Var(name, initializer);
+        }
+
+        private AbstractStatement Statement()
+        {
+            if (Match(TokenType.PRINT))
+            {
+                return PrintStatement();
+            }
+
+            return ExpressionStatement();
+        }
+
+        private AbstractStatement PrintStatement()
+        {
+            var value = Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after value.");
+            return new Print(value);
+        }
+
+        private AbstractStatement ExpressionStatement()
+        {
+            var expression = Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+            return new ExpressionStatement(expression);
+        }
+
         private IExpression Expression()
         {
-            return Equality();
+            return Assignment();
+        }
+
+        private IExpression Assignment()
+        {
+            var expression = Equality();
+            if (Match(TokenType.EQUAL))
+            {
+                var equals = Previous();
+                var value = Assignment();
+
+                if (expression is Variable)
+                {
+                    var name = ((Variable) expression).Name;
+                    return new Assign(name, value);
+                }
+
+                RaiseError(equals, "Invalid assignment target.");
+            }
+
+            return expression;
         }
 
         /// <summary>
-        /// equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+        ///     equality       → comparison ( ( "!=" | "==" ) comparison )* ;
         /// </summary>
         /// <returns></returns>
         private IExpression Equality()
@@ -48,10 +128,9 @@ namespace Yano
 
             while (Match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL))
             {
-                Token operatorToken = Previous();
-                IExpression right = Comparison();
+                var operatorToken = Previous();
+                var right = Comparison();
                 expression = new Binary(expression, operatorToken, right);
-
             }
 
             return expression;
@@ -107,12 +186,12 @@ namespace Yano
         }
 
         /// <summary>
-        /// comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+        ///     comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
         /// </summary>
         /// <returns></returns>
         private IExpression Comparison()
         {
-            IExpression teminalExpression = Term();
+            var teminalExpression = Term();
             while (Match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL))
             {
                 var operatorToken = Previous();
@@ -124,17 +203,17 @@ namespace Yano
         }
 
         /// <summary>
-        /// addition and subtraction:
+        ///     addition and subtraction:
         /// </summary>
         /// <returns></returns>
         private IExpression Term()
         {
-            IExpression expression = Factor();
+            var expression = Factor();
             while (Match(TokenType.MINUS, TokenType.PLUS))
             {
                 var operatorToken = Previous();
-                IExpression rightExpression = Factor();
-                expression = new Binary(expression,operatorToken, rightExpression);
+                var rightExpression = Factor();
+                expression = new Binary(expression, operatorToken, rightExpression);
             }
 
             return expression;
@@ -142,7 +221,7 @@ namespace Yano
 
         private IExpression Factor()
         {
-            IExpression expression = Unary();
+            var expression = Unary();
             while (Match(TokenType.SLASH, TokenType.STAR))
             {
                 var operatorToken = Previous();
@@ -154,8 +233,8 @@ namespace Yano
         }
 
         /// <summary>
-        /// unary          → ( "!" | "-" ) unary
-        ///                | primary ;
+        ///     unary          → ( "!" | "-" ) unary
+        ///     | primary ;
         /// </summary>
         /// <returns></returns>
         private IExpression Unary()
@@ -171,8 +250,8 @@ namespace Yano
         }
 
         /// <summary>
-        /// primary        → NUMBER | STRING | "true" | "false" | "nil"
-        ///                  | "(" expression ")" ;
+        ///     primary        → NUMBER | STRING | "true" | "false" | "nil"
+        ///     | "(" expression ")" ;
         /// </summary>
         /// <returns></returns>
         private IExpression Primary()
@@ -197,6 +276,11 @@ namespace Yano
                 return new Literal(Previous().Literal);
             }
 
+            if (Match(TokenType.IDENTIFIER))
+            {
+                return new Variable(Previous());
+            }
+
             if (Match(TokenType.LEFT_PAREN))
             {
                 var expression = Expression();
@@ -211,7 +295,7 @@ namespace Yano
         {
             if (Check(tokenType))
             {
-                Advance();
+                return Advance();
             }
 
             throw RaiseError(Peek(), message);
@@ -248,7 +332,6 @@ namespace Yano
 
                 Advance();
             }
-
         }
     }
 }

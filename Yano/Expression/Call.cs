@@ -26,9 +26,9 @@ namespace Yano.Expression
             Arguments = arguments;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitCallExpr(this);
+            return expressionVisitor.VisitCallExpr(this);
         }
     }
 }

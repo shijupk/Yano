@@ -23,9 +23,9 @@ namespace Yano.Expression
             Right = right;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitUnaryExpr(this);
+            return expressionVisitor.VisitUnaryExpr(this);
         }
     }
 }

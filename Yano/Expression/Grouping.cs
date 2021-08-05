@@ -21,9 +21,9 @@ namespace Yano.Expression
             Expression = expression;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitGroupingExpr(this);
+            return expressionVisitor.VisitGroupingExpr(this);
         }
     }
 }

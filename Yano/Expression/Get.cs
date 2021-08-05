@@ -23,9 +23,9 @@ namespace Yano.Expression
             Token = token;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitGetExpr(this);
+            return expressionVisitor.VisitGetExpr(this);
         }
     }
 }

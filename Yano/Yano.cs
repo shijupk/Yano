@@ -41,7 +41,7 @@ namespace Yano
             if (args.Length > 1)
             {
                 Console.WriteLine("Usage: Yano <script>");
-                Environment.Exit(0);
+                System.Environment.Exit(0);
             }
             else if (args.Length == 1)
             {
@@ -103,12 +103,12 @@ namespace Yano
             if (!HadError)
             {
                 var parser = new Parser(tokens);
-                var expression = parser.Parse();
+                var statements = parser.Parse();
                 if (!HadError)
                 {
                     //var res = new AstPrinter().Print(expression);
-                    var res = _interpreter.Interpret(expression);
-                    Output(res);
+                    _interpreter.Interpret(statements);
+                    //Output(res);
                 }
 
             }

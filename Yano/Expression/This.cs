@@ -21,9 +21,9 @@ namespace Yano.Expression
             Keyword = keyword;
         }
 
-        public T Accept<T>(IVisitor<T> visitor)
+        public T Accept<T>(IExpressionVisitor<T> expressionVisitor)
         {
-            return visitor.VisitThisExpr(this);
+            return expressionVisitor.VisitThisExpr(this);
         }
     }
 }
