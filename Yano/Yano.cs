@@ -8,6 +8,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Yano.Exception;
 using Yano.Expression;
@@ -45,11 +47,10 @@ namespace Yano
             }
             else if (args.Length == 1)
             {
-                //read file
+                RunFile(args[0]);
             }
             else
             {
-                //TestMethod();
                 Prompt();
             }
         }
@@ -63,9 +64,6 @@ namespace Yano
                 new Token(TokenType.STAR, "*", null, 1, 2),
                 new Grouping(
                     new Literal(45.67)));
-
-            //var expr = new Binary(new Literal(123), new Token(TokenType.STAR, "*", null, 1, 2), new Literal(123));
-
 
             var res = new AstPrinter().Print(expr);
             Console.WriteLine(res);
@@ -95,21 +93,50 @@ namespace Yano
             }
         }
 
+        private static void RunFile(string path)
+        {
+            try
+            {
+                var inputFile = new StreamReader(path);
+                string code = inputFile.ReadToEnd();
+                code = code.Replace("\r", "");
+                Run(code);
+            }
+            catch (System.Exception ex)
+            {
+                Output(ex.Message, "Error", ConsoleColor.Red);
+            }
+            System.Environment.Exit(0);
+        }
+
+
         private static void Run(string line)
         {
             var scanner = new Scanner(line);
             var tokens = scanner.ScanTokens();
             PrintLex(tokens);
-            if (!HadError)
+           if (HadError)
+           {
+               System.Environment.Exit(0);
+           }
+
+            var parser = new Parser(tokens);
+            var statements = parser.Parse();
+
+            if (HadError)
             {
-                var parser = new Parser(tokens);
-                var statements = parser.Parse();
-                if (!HadError)
-                {
-                    //var res = new AstPrinter().Print(expression);
-                    _interpreter.Interpret(statements);
-                    //Output(res);
-                }
+                System.Environment.Exit(0);
+            }
+
+            //var res = new AstPrinter().Print(expression);
+            _interpreter.Interpret(statements);
+            if (HadRuntimeError)
+            {
+                System.Environment.Exit(0);
+            }
+            else
+            {
+                Output("Program executed successfully.", "Yano");
             }
         }
 
@@ -166,10 +193,9 @@ namespace Yano
             Console.ResetColor();
         }
 
-        private static void Output(string message)
+        private static void Output(string message, string bannerMsg = "Result", ConsoleColor color = ConsoleColor.Cyan)
         {
-            var bannerMsg = "Result";
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = color;
             Console.WriteLine($" {BoxTopLeft}{bannerMsg}{new string(BoxTop, message.Length)}{BoxTopRight}");
             Console.WriteLine($" {BoxLeft}{message}{new string(' ', bannerMsg.Length)}{BoxRight}");
             Console.WriteLine(
