@@ -30,7 +30,7 @@ namespace Yano
             return _declaration.Parameters.Count;
         }
 
-        public object call(Interpreter interpreter, IList<object> arguments)
+        public object Call(Interpreter interpreter, IList<object> arguments)
         {
             var environment = new Environment(_closure);
             for (var i = 0; i < _declaration.Parameters.Count; i++)

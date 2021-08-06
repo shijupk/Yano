@@ -129,6 +129,14 @@ namespace Yano
             }
 
             //var res = new AstPrinter().Print(expression);
+            Resolver resolver = new Resolver(_interpreter);
+            resolver.Resolve(statements);
+
+            if (HadError)
+            {
+                System.Environment.Exit(0);
+            }
+
             _interpreter.Interpret(statements);
             if (HadRuntimeError)
             {

@@ -18,12 +18,12 @@ namespace Yano.Statement
     {
         public Token Name { get; set; }
         public Variable SuperClass { get; set; }
-        private IList<Function> Methods { get; }
+        public IList<Function> Methods { get; set; }
 
-        public Class(Token name, Variable superClass, IList<Function> methods)
+        public Class(Token name, IList<Function> methods)
         {
-            Name = Name;
-            SuperClass = superClass;
+            Name = name;
+            //SuperClass = superClass;
             Methods = methods;
         }
 

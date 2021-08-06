@@ -15,12 +15,12 @@ namespace Yano.Expression
     public class Get : IExpression
     {
         public IExpression Object { get; set; }
-        public Token Token { get; set; }
+        public Token Name { get; set; }
 
         public Get(IExpression obj, Token token)
         {
             Object = obj;
-            Token = token;
+            Name = token;
         }
 
         public T Accept<T>(IExpressionVisitor<T> expressionVisitor)

@@ -15,6 +15,6 @@ namespace Yano
     public interface YannoCallable
     {
         int Arity();
-        object call(Interpreter interpreter, IList<object> arguments);
+        object Call(Interpreter interpreter, IList<object> arguments);
     }
 }

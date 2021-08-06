@@ -31,5 +31,10 @@ namespace Yano
         {
             return $"{Type} {Lexeme} {Literal}";
         }
+
+        public new string ToString()
+        {
+            return $"{Type} {Lexeme} {Literal}";
+        }
     }
 }

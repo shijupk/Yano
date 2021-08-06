@@ -14,13 +14,15 @@ namespace Yano.Expression
 {
     public class Set : IExpression
     {
-        public Token Keyword { get; set; }
-        public Token Method { get; set; }
+        public IExpression Object { get; set; }
+        public Token Name { get; set; }
+        public IExpression Value { get; set; }
 
-        public Set(Token keyword, Token method)
+        public Set(IExpression obj, Token name, IExpression value)
         {
-            Keyword = keyword;
-            Method = method;
+            Object = obj;
+            Name = name;
+            Value = value;
         }
 
         public T Accept<T>(IExpressionVisitor<T> expressionVisitor)

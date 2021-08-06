@@ -6,6 +6,7 @@
 
 #region
 
+using System;
 using System.Collections.Generic;
 using Yano.Exception;
 using Yano.Expression;
@@ -41,6 +42,10 @@ namespace Yano
         {
             try
             {
+                if (Match(TokenType.CLASS))
+                {
+                    return ClassDeclaration();
+                }
                 if (Match(TokenType.FUN))
                 {
                     return Function("function");
@@ -58,6 +63,21 @@ namespace Yano
                 Synchronize();
                 return null;
             }
+        }
+
+        private AbstractStatement ClassDeclaration()
+        {
+            var name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+            Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+            IList<Function> methods = new List<Function>();
+            while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+            {
+                methods.Add(Function("method"));
+            }
+
+            Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+            return new Class(name, methods);
         }
 
         private Function Function(string kind)
@@ -265,10 +285,14 @@ namespace Yano
                 var equals = Previous();
                 var value = Assignment();
 
-                if (expression is Variable)
+                if (expression is Variable variable)
                 {
-                    var name = ((Variable) expression).Name;
+                    var name = variable.Name;
                     return new Assign(name, value);
+                }
+                else if (expression is Get get)
+                {
+                    return new Set(get.Object, get.Name, value);
                 }
 
                 RaiseError(equals, "Invalid assignment target.");
@@ -442,6 +466,11 @@ namespace Yano
                 if (Match(TokenType.LEFT_PAREN))
                 {
                     expression = FinishCall(expression);
+                }
+                else if (Match(TokenType.DOT))
+                {
+                    var name = Consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                    expression = new Get(expression, name);
                 }
                 else
                 {

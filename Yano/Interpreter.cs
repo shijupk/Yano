@@ -21,6 +21,7 @@ namespace Yano
     {
         private Environment _environment;
         public Environment Globals { get; set; } = new Environment();
+        private IDictionary<IExpression, object> _locals = new Dictionary<IExpression, object>();
 
         public Interpreter()
         {
@@ -28,10 +29,24 @@ namespace Yano
             Globals.Define("clock", new ClockCallable());
         }
 
+        public void Resolve(IExpression expression, int depth)
+        {
+            _locals[expression] = depth;
+        }
         public object VisitAssignExpr(Assign expr)
         {
             var value = Evaluate(expr.Value);
-            _environment.Assign(expr.Name, value);
+
+            var distance = _locals[expr];
+            if (distance != null)
+            {
+                _environment.AssignAt((int) distance, expr.Name, expr.Value);
+            }
+            else
+            {
+                _environment.Assign(expr.Name, value);
+            }
+           
             return value;
         }
 
@@ -96,7 +111,7 @@ namespace Yano
 
             if (!(callee is YannoCallable))
             {
-                throw new RuntimeException(expr.Parenthesis, "Can only call functions and classes.");
+                throw new RuntimeException(expr.Parenthesis, "Can only Call functions and classes.");
             }
 
             var function = (YannoCallable) callee;
@@ -106,12 +121,17 @@ namespace Yano
                     $"Expected {function.Arity()} arguments but got {arguments.Count}");
             }
 
-            return function.call(this, arguments);
+            return function.Call(this, arguments);
         }
 
         public object VisitGetExpr(Get expr)
         {
-            throw new NotImplementedException();
+            var obj = Evaluate(expr.Object);
+            if (obj is YanoInstance instance)
+            {
+                return instance.Get(expr.Name);
+            }
+            throw new RuntimeException(expr.Name,"Only instances have properties.");
         }
 
         public object VisitGroupingExpr(Grouping expr)
@@ -145,7 +165,17 @@ namespace Yano
 
         public object VisitSetExpr(Set expr)
         {
-            throw new NotImplementedException();
+            var obj = Evaluate(expr.Object);
+            if (!(obj is YanoInstance))
+            {
+                throw new RuntimeException(expr.Name, "Only instances have fields.");
+            }
+
+            var value = Evaluate(expr.Value);
+            ((YanoInstance) obj).Set(expr.Name, value);
+
+            return value;
+
         }
 
         public object VisitSuperExpr(Super expr)
@@ -174,7 +204,21 @@ namespace Yano
 
         public object VisitVariableExpr(Variable expr)
         {
-            return _environment.Get(expr.Name);
+            return LookupVariable(expr.Name, expr);
+        }
+
+        private object LookupVariable(Token name, IExpression expr)
+        {
+            var distance = _locals[expr];
+            if (distance != null)
+            {
+                return _environment.GetAt((int) distance, name.Lexeme);
+            }
+            else
+            {
+                return _environment.Get(name);
+            }
+            
         }
 
         public object VisitBlockStmt(Block stmt)
@@ -185,7 +229,17 @@ namespace Yano
 
         public object VisitClassStmt(Class stmt)
         {
-            throw new NotImplementedException();
+            _environment.Define(stmt.Name.Lexeme, null);
+            var methods = new Dictionary<string, YanoFunction>();
+            foreach (var method in stmt.Methods)
+            {
+                var function = new YanoFunction(method, _environment);
+                methods.Add(method.Name.Lexeme, function);
+            }
+
+            var klass = new YanoClass(stmt.Name.Lexeme, methods);
+            _environment.Assign(stmt.Name, klass);
+            return null;
         }
 
         public object VisitExpressionStmt(ExpressionStatement stmt)
@@ -378,7 +432,7 @@ namespace Yano
                 return 0;
             }
 
-            public object call(Interpreter interpreter, IList<object> arguments)
+            public object Call(Interpreter interpreter, IList<object> arguments)
             {
                 return DateTime.Now.Second;
             }
