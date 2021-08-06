@@ -20,8 +20,8 @@ namespace Yano
     public class Interpreter : IExpressionVisitor<object>, IStatementVisitor<object>
     {
         private Environment _environment;
+        private readonly IDictionary<IExpression, object> _locals = new Dictionary<IExpression, object>();
         public Environment Globals { get; set; } = new Environment();
-        private IDictionary<IExpression, object> _locals = new Dictionary<IExpression, object>();
 
         public Interpreter()
         {
@@ -29,10 +29,6 @@ namespace Yano
             Globals.Define("clock", new ClockCallable());
         }
 
-        public void Resolve(IExpression expression, int depth)
-        {
-            _locals[expression] = depth;
-        }
         public object VisitAssignExpr(Assign expr)
         {
             var value = Evaluate(expr.Value);
@@ -46,7 +42,7 @@ namespace Yano
             {
                 _environment.Assign(expr.Name, value);
             }
-           
+
             return value;
         }
 
@@ -131,7 +127,8 @@ namespace Yano
             {
                 return instance.Get(expr.Name);
             }
-            throw new RuntimeException(expr.Name,"Only instances have properties.");
+
+            throw new RuntimeException(expr.Name, "Only instances have properties.");
         }
 
         public object VisitGroupingExpr(Grouping expr)
@@ -175,17 +172,31 @@ namespace Yano
             ((YanoInstance) obj).Set(expr.Name, value);
 
             return value;
-
         }
 
         public object VisitSuperExpr(Super expr)
         {
-            throw new NotImplementedException();
+            var distance = (int) _locals[expr];
+            var superclass = (YanoClass) _environment.GetAt(
+                distance, "super");
+
+            var obj = (YanoInstance) _environment.GetAt(distance - 1, "this");
+
+            var method = superclass.FindMethod(expr.Method.Lexeme);
+
+            if (method == null)
+            {
+                throw new RuntimeException(expr.Method,
+                    $"Undefined property '{expr.Method.Lexeme}'.");
+            }
+
+
+            return method.Bind(obj);
         }
 
         public object VisitThisExpr(This expr)
         {
-            throw new NotImplementedException();
+            return LookupVariable(expr.Keyword, expr);
         }
 
         public object VisitUnaryExpr(Unary expr)
@@ -207,20 +218,6 @@ namespace Yano
             return LookupVariable(expr.Name, expr);
         }
 
-        private object LookupVariable(Token name, IExpression expr)
-        {
-            var distance = _locals[expr];
-            if (distance != null)
-            {
-                return _environment.GetAt((int) distance, name.Lexeme);
-            }
-            else
-            {
-                return _environment.Get(name);
-            }
-            
-        }
-
         public object VisitBlockStmt(Block stmt)
         {
             ExecuteBlock(stmt.Statements, new Environment(_environment));
@@ -229,15 +226,36 @@ namespace Yano
 
         public object VisitClassStmt(Class stmt)
         {
+            object superClass = null;
+            if (stmt.SuperClass != null)
+            {
+                superClass = Evaluate(stmt.SuperClass);
+                if (!(superClass is YanoClass))
+                {
+                    throw new RuntimeException(stmt.SuperClass.Name, "Superclass must be a class.");
+                }
+            }
+
             _environment.Define(stmt.Name.Lexeme, null);
+            if (stmt.SuperClass != null)
+            {
+                _environment = new Environment(_environment);
+                _environment.Define("super", superClass);
+            }
+
             var methods = new Dictionary<string, YanoFunction>();
             foreach (var method in stmt.Methods)
             {
-                var function = new YanoFunction(method, _environment);
+                var function = new YanoFunction(method, _environment, method.Name.Lexeme.Equals("init"));
                 methods.Add(method.Name.Lexeme, function);
             }
 
-            var klass = new YanoClass(stmt.Name.Lexeme, methods);
+            var klass = new YanoClass(stmt.Name.Lexeme, (YanoClass) superClass, methods);
+            if (superClass != null)
+            {
+                _environment = _environment.Enclosing;
+            }
+
             _environment.Assign(stmt.Name, klass);
             return null;
         }
@@ -250,7 +268,7 @@ namespace Yano
 
         public object VisitFunctionStmt(Function stmt)
         {
-            var function = new YanoFunction(stmt, _environment);
+            var function = new YanoFunction(stmt, _environment, false);
             _environment.Define(stmt.Name.Lexeme, function);
             return null;
         }
@@ -308,6 +326,22 @@ namespace Yano
             }
 
             return null;
+        }
+
+        public void Resolve(IExpression expression, int depth)
+        {
+            _locals[expression] = depth;
+        }
+
+        private object LookupVariable(Token name, IExpression expr)
+        {
+            var distance = _locals[expr];
+            if (distance != null)
+            {
+                return _environment.GetAt((int) distance, name.Lexeme);
+            }
+
+            return _environment.Get(name);
         }
 
         public void Interpret(IList<AbstractStatement> statements)

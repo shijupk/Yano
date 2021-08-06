@@ -20,10 +20,10 @@ namespace Yano.Statement
         public Variable SuperClass { get; set; }
         public IList<Function> Methods { get; set; }
 
-        public Class(Token name, IList<Function> methods)
+        public Class(Token name, Variable superClass, IList<Function> methods)
         {
             Name = name;
-            //SuperClass = superClass;
+            SuperClass = superClass;
             Methods = methods;
         }
 

@@ -6,7 +6,6 @@
 
 #region
 
-using System;
 using System.Collections.Generic;
 using Yano.Exception;
 using Yano.Expression;
@@ -46,6 +45,7 @@ namespace Yano
                 {
                     return ClassDeclaration();
                 }
+
                 if (Match(TokenType.FUN))
                 {
                     return Function("function");
@@ -68,6 +68,13 @@ namespace Yano
         private AbstractStatement ClassDeclaration()
         {
             var name = Consume(TokenType.IDENTIFIER, "Expect class name.");
+            Variable superClass = null;
+            if (Match(TokenType.LESS))
+            {
+                Consume(TokenType.IDENTIFIER, "Expect superclass name");
+                superClass = new Variable(Previous());
+            }
+
             Consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
             IList<Function> methods = new List<Function>();
             while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
@@ -77,7 +84,7 @@ namespace Yano
 
             Consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-            return new Class(name, methods);
+            return new Class(name, superClass, methods);
         }
 
         private Function Function(string kind)
@@ -290,7 +297,8 @@ namespace Yano
                     var name = variable.Name;
                     return new Assign(name, value);
                 }
-                else if (expression is Get get)
+
+                if (expression is Get get)
                 {
                     return new Set(get.Object, get.Name, value);
                 }
@@ -527,6 +535,20 @@ namespace Yano
             if (Match(TokenType.NUMBER, TokenType.STRING))
             {
                 return new Literal(Previous().Literal);
+            }
+
+            if (Match(TokenType.SUPER))
+            {
+                var keyword = Previous();
+                Consume(TokenType.DOT, "Expect '.' after 'super'.");
+                var method = Consume(TokenType.IDENTIFIER,
+                    "Expect superclass method name.");
+                return new Super(keyword, method);
+            }
+
+            if (Match(TokenType.THIS))
+            {
+                return new This(Previous());
             }
 
             if (Match(TokenType.IDENTIFIER))

@@ -79,7 +79,7 @@ namespace Yano
         {
             var environment = this;
 
-            for (int i = 0; i < distance; i++)
+            for (var i = 0; i < distance; i++)
             {
                 environment = environment.Enclosing;
             }

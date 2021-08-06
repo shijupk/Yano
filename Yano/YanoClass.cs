@@ -1,20 +1,49 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: YanoClass.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+#endregion
 
 namespace Yano
 {
     public class YanoClass : YannoCallable
     {
+        private readonly IDictionary<string, YanoFunction> _methods;
         public string Name { get; set; }
-        private IDictionary<string, YanoFunction> _methods;
+        public YanoClass SuperClass { get; set; }
 
-        public YanoClass(string name, IDictionary<string, YanoFunction> methods)
+        public YanoClass(string name, YanoClass superClass, IDictionary<string, YanoFunction> methods)
         {
             Name = name;
             _methods = methods;
+            SuperClass = superClass;
+        }
+
+
+        public int Arity()
+        {
+            var initializer = FindMethod("init");
+            if (initializer == null)
+            {
+                return 0;
+            }
+
+            return initializer.Arity();
+        }
+
+        public object Call(Interpreter interpreter, IList<object> arguments)
+        {
+            var instance = new YanoInstance(this);
+            var initializer = FindMethod("init");
+            initializer?.Bind(instance).Call(interpreter, arguments);
+
+            return instance;
         }
 
         public YanoFunction FindMethod(string name)
@@ -24,19 +53,12 @@ namespace Yano
                 return _methods[name];
             }
 
+            if (SuperClass != null)
+            {
+                return SuperClass.FindMethod(name);
+            }
+
             return null;
-        }
-
-
-        public int Arity()
-        {
-            return 0;
-        }
-
-        public object Call(Interpreter interpreter, IList<object> arguments)
-        {
-            YanoInstance instance = new YanoInstance(this);
-            return instance;
         }
 
         public new string ToString()

@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Yano.Exception;
 using Yano.Expression;
@@ -98,7 +97,7 @@ namespace Yano
             try
             {
                 var inputFile = new StreamReader(path);
-                string code = inputFile.ReadToEnd();
+                var code = inputFile.ReadToEnd();
                 code = code.Replace("\r", "");
                 Run(code);
             }
@@ -106,6 +105,7 @@ namespace Yano
             {
                 Output(ex.Message, "Error", ConsoleColor.Red);
             }
+
             System.Environment.Exit(0);
         }
 
@@ -115,10 +115,10 @@ namespace Yano
             var scanner = new Scanner(line);
             var tokens = scanner.ScanTokens();
             PrintLex(tokens);
-           if (HadError)
-           {
-               System.Environment.Exit(0);
-           }
+            if (HadError)
+            {
+                System.Environment.Exit(0);
+            }
 
             var parser = new Parser(tokens);
             var statements = parser.Parse();
@@ -129,7 +129,7 @@ namespace Yano
             }
 
             //var res = new AstPrinter().Print(expression);
-            Resolver resolver = new Resolver(_interpreter);
+            var resolver = new Resolver(_interpreter);
             resolver.Resolve(statements);
 
             if (HadError)

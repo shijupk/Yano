@@ -1,16 +1,22 @@
-﻿using System;
+﻿// ---------------------------------------------------------------------------------------
+// Copyright Shiju P K 2021
+// 
+// FILENAME: YanoInstance.cs
+// ----------------------------------------------------------------------------------------
+
+#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Yano.Exception;
+
+#endregion
 
 namespace Yano
 {
-    class YanoInstance
+    public class YanoInstance
     {
-        private YanoClass _class;
-        private IDictionary<string, object> _fields = new Dictionary<string, object>();
+        private readonly YanoClass _class;
+        private readonly IDictionary<string, object> _fields = new Dictionary<string, object>();
 
         public YanoInstance(YanoClass yClass)
         {
@@ -27,8 +33,9 @@ namespace Yano
             var method = _class.FindMethod(name.Lexeme);
             if (method != null)
             {
-                return method;
+                return method.Bind(this);
             }
+
             throw new RuntimeException(name, $"Undefined property '{name.Lexeme}'.");
         }
 

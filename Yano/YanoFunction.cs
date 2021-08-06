@@ -18,11 +18,13 @@ namespace Yano
     {
         private readonly Environment _closure;
         private readonly Function _declaration;
+        private readonly bool _isInitializer;
 
-        public YanoFunction(Function function, Environment closure)
+        public YanoFunction(Function function, Environment closure, bool isInitializer)
         {
             _declaration = function;
             _closure = closure;
+            _isInitializer = isInitializer;
         }
 
         public int Arity()
@@ -44,10 +46,27 @@ namespace Yano
             }
             catch (ReturnAsException returnValue)
             {
+                if (_isInitializer)
+                {
+                    return _closure.GetAt(0, "this");
+                }
+
                 return returnValue.Value;
             }
 
+            if (_isInitializer)
+            {
+                return _closure.GetAt(0, "this");
+            }
+
             return null;
+        }
+
+        public YanoFunction Bind(YanoInstance instance)
+        {
+            var environment = new Environment(_closure);
+            environment.Define("this", instance);
+            return new YanoFunction(_declaration, environment, _isInitializer);
         }
 
         public new string ToString()
